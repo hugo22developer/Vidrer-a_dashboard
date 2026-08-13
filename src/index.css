@@ -1,0 +1,112 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+/*
+  Sistema de tokens SEMÁNTICOS (no literales de color) para soportar
+  claro/oscuro real con un solo switch de clase en <html>. Todos los
+  componentes del panel consumen bg-canvas / bg-surface / text-ink / etc,
+  nunca colores hardcodeados — así el modo claro no requiere tocar
+  ningún componente.
+*/
+@theme {
+  --color-canvas: #0b0d10;      /* fondo general */
+  --color-surface: #14171c;     /* tarjetas, sidebar, tabla */
+  --color-surface-2: #1b1f26;   /* elevado: modales, dropdowns, inputs */
+  --color-line: #262b33;        /* bordes */
+  --color-ink: #e4e7eb;         /* texto primario */
+  --color-ink-muted: #8c919b;   /* texto secundario */
+  --color-ink-faint: #5b6470;   /* texto terciario / placeholders */
+
+  --color-accent: #f2a65a;      /* ámbar — CTA primario */
+  --color-accent-ink: #14171c;  /* texto sobre accent */
+  --color-accent2: #8fe3f2;     /* cian vidrio — firma de marca */
+  --color-danger: #f2726a;
+  --color-danger-ink: #2a0d0b;
+  --color-success: #7bd88f;
+  --color-success-ink: #0b2a12;
+
+  --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
+  --font-body: "Inter", ui-sans-serif, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --shadow-panel: 0 8px 32px -8px rgb(0 0 0 / 0.45);
+}
+
+.light {
+  --color-canvas: #f1f2f4;
+  --color-surface: #ffffff;
+  --color-surface-2: #ffffff;
+  --color-line: #e2e4e8;
+  --color-ink: #14171c;
+  --color-ink-muted: #5b6470;
+  --color-ink-faint: #8c919b;
+
+  --color-accent: #d9852f;
+  --color-accent-ink: #ffffff;
+  --color-accent2: #0d94ab;
+  --color-danger: #d9483f;
+  --color-danger-ink: #ffffff;
+  --color-success: #2f9e57;
+  --color-success-ink: #ffffff;
+
+  --shadow-panel: 0 8px 28px -10px rgb(20 23 28 / 0.16);
+}
+
+html {
+  background-color: var(--color-canvas);
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: var(--color-accent2);
+  color: var(--color-canvas);
+}
+
+.glass-panel {
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  border: 1px solid var(--color-line);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-panel);
+}
+
+.blueprint-grid {
+  background-image: linear-gradient(var(--color-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.35;
+}
+
+/* Scrollbar discreto, coherente con el resto */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 999px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Aísla la hoja de cotización al imprimir/"descargar como PDF" desde el navegador. */
+@media print {
+  body * { visibility: hidden; }
+  #quote-print-area, #quote-print-area * { visibility: visible; }
+  #quote-print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    background: #ffffff;
+    color: #14171c;
+  }
+}
