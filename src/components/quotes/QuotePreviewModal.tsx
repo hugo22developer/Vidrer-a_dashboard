@@ -1,6 +1,8 @@
-import { Download, RefreshCcw } from "lucide-react";
+import { Download, FileDown, RefreshCcw } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
+import { downloadQuotePdf } from "@/lib/api";
 import { formatMXN } from "@/lib/quoteConfig";
+import { generarVistaPreviaPDF } from "@/lib/quotePdf";
 import type { ClientData, QuoteItem } from "@/lib/quoteTypes";
 
 interface QuotePreviewModalProps {
@@ -12,7 +14,7 @@ interface QuotePreviewModalProps {
   onIvaChange: (value: number) => void;
   totals: { subtotal: number; iva: number; total: number };
   onReset: () => void;
-  quoteMeta?: { folio: string; createdAt: string } | null;
+  quoteMeta?: { id: string; folio: string; createdAt: string } | null;
 }
 
 const QUOTE_NUMBER = "COT-PENDIENTE";
@@ -23,6 +25,16 @@ export function QuotePreviewModal({ open, onClose, client, cart, ivaPercent, onI
   const issueDate = quoteMeta?.createdAt
     ? new Date(quoteMeta.createdAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })
     : ISSUE_DATE;
+
+  async function handleDownloadPdf() {
+    if (!quoteMeta) return;
+    try {
+      await downloadQuotePdf(quoteMeta.id, `${quoteMeta.folio}.pdf`);
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "No se pudo descargar el PDF");
+    }
+  }
+
   return (
     <Modal open={open} onClose={onClose} title="Vista previa de la cotización" size="lg">
       <div className="mb-4 flex items-center justify-between gap-3 rounded-xl bg-surface-2 px-4 py-2.5">
@@ -37,13 +49,31 @@ export function QuotePreviewModal({ open, onClose, client, cart, ivaPercent, onI
             className="w-16 rounded-lg border border-line bg-surface px-2 py-1 text-center font-mono text-xs text-ink outline-none focus:border-accent2"
           />
         </label>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
           <button
-            onClick={() => window.print()}
+            onClick={() =>
+              generarVistaPreviaPDF({
+                client,
+                cart,
+                ivaPercent,
+                totals,
+                folio: quoteMeta?.folio,
+                issueDate,
+                validUntil: VALID_UNTIL,
+              })
+            }
             className="flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 font-display text-xs font-semibold text-accent-ink transition-transform hover:scale-[1.03]"
           >
-            <Download size={13} /> Descargar / Imprimir
+            <Download size={13} /> Vista previa / Imprimir
           </button>
+          {quoteMeta && (
+            <button
+              onClick={handleDownloadPdf}
+              className="flex items-center gap-1.5 rounded-full border border-accent2/40 bg-accent2/5 px-4 py-2 font-display text-xs font-semibold text-accent2 transition-colors hover:bg-accent2/10"
+            >
+              <FileDown size={13} /> Descargar PDF
+            </button>
+          )}
           <button
             onClick={onReset}
             className="flex items-center gap-1.5 rounded-full border border-line px-4 py-2 font-body text-xs text-ink-muted transition-colors hover:text-ink"
@@ -53,7 +83,7 @@ export function QuotePreviewModal({ open, onClose, client, cart, ivaPercent, onI
         </div>
       </div>
 
-      {/* Hoja membretada — esto es lo único visible al imprimir */}
+      {/* Resumen en pantalla — el documento formal imprimible se genera con generarVistaPreviaPDF() */}
       <div id="quote-print-area" className="rounded-2xl border border-line bg-surface-2 p-6 sm:p-8">
         <div className="flex items-start justify-between border-b border-line pb-5">
           <div className="flex items-center gap-3">

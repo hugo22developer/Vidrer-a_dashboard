@@ -22,7 +22,7 @@ export function useQuoteBuilder() {
   const [client, setClient] = useState<ClientData>(EMPTY_CLIENT);
   const [ivaPercent, setIvaPercent] = useState(DEFAULT_IVA_PERCENT);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [savedQuote, setSavedQuote] = useState<{ folio: string; createdAt: string } | null>(null);
+  const [savedQuote, setSavedQuote] = useState<{ id: string; folio: string; createdAt: string } | null>(null);
   const [savingQuote, setSavingQuote] = useState(false);
 
   const category = draft.categoryId ? PRODUCT_CATEGORIES.find((c) => c.id === draft.categoryId) ?? null : null;
@@ -136,7 +136,7 @@ export function useQuoteBuilder() {
   async function generateQuote() {
     setSavingQuote(true);
     try {
-      const quote = await apiFetch<{ folio: string; createdAt: string }>("/quotes", {
+      const quote = await apiFetch<{ id: string; folio: string; createdAt: string }>("/quotes", {
         method: "POST",
         body: JSON.stringify({
           clientName: client.name,
@@ -159,7 +159,7 @@ export function useQuoteBuilder() {
           })),
         }),
       });
-      setSavedQuote({ folio: quote.folio, createdAt: quote.createdAt });
+      setSavedQuote({ id: quote.id, folio: quote.folio, createdAt: quote.createdAt });
       setPreviewOpen(true);
     } finally {
       setSavingQuote(false);

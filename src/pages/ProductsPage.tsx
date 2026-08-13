@@ -10,11 +10,17 @@ import { useData } from "@/context/DataContext";
 import type { Product } from "@/lib/types";
 
 function ThumbCell({ product }: { product: Product }) {
-  const [failed, setFailed] = useState(false);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
   return (
     <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-line bg-surface-2">
-      {!failed && product.image ? (
-        <img src={product.image} alt="" onError={() => setFailed(true)} className="h-full w-full object-cover" />
+      {failedSrc !== product.image && product.image ? (
+        <img
+          key={product.image}
+          src={product.image}
+          alt=""
+          onError={() => setFailedSrc(product.image)}
+          className="h-full w-full object-cover"
+        />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-ink-faint">
           <ImageOff size={14} />

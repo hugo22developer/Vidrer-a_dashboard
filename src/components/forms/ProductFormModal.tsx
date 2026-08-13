@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { FormField, inputClass } from "@/components/ui/FormField";
 import { SpecListEditor } from "@/components/ui/SpecListEditor";
 import { ImageOff } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 import type { Category, Product, ProductStatus } from "@/lib/types";
 
 interface ProductFormModalProps {
@@ -36,6 +37,8 @@ export function ProductFormModal({ open, onClose, onSave, initial, categories, d
 
   const [form, setForm] = useState(empty);
   const [imgFailed, setImgFailed] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -94,29 +97,48 @@ export function ProductFormModal({ open, onClose, onSave, initial, categories, d
           {/* Previsualización de imagen */}
           <div>
             <span className="mb-1.5 block font-mono text-xs text-ink-muted">Imagen</span>
-            <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-line bg-surface-2">
+            <div
+              className="relative aspect-[4/5] overflow-hidden rounded-xl border border-line bg-surface-2 cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+            >
               {form.image && !imgFailed ? (
-                <img
-                  src={form.image}
-                  alt=""
-                  onError={() => setImgFailed(true)}
-                  className="h-full w-full object-cover"
-                />
+                <img src={form.image} alt="" onError={() => setImgFailed(true)} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full flex-col items-center justify-center gap-2 text-ink-faint">
                   <ImageOff size={22} strokeWidth={1.5} />
-                  <span className="px-4 text-center font-mono text-[11px]">Sin vista previa disponible</span>
+                  <span className="px-4 text-center font-mono text-[11px]">Toca para seleccionar imagen</span>
+                </div>
+              )}
+
+              {uploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                  <span className="font-mono text-sm text-white">Subiendo...</span>
                 </div>
               )}
             </div>
+
             <input
-              value={form.image}
-              onChange={(e) => {
-                setForm({ ...form, image: e.target.value });
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setUploading(true);
                 setImgFailed(false);
+                try {
+                  const fd = new FormData();
+                  fd.append("file", file);
+                  const data = await apiFetch<{ url: string }>("/uploads", { method: "POST", body: fd });
+                  if (data?.url) setForm({ ...form, image: data.url });
+                } catch (err) {
+                  // Silencioso: marcar fallo de imagen
+                  setImgFailed(true);
+                } finally {
+                  setUploading(false);
+                }
               }}
-              placeholder="/products/categoria/archivo.jpg"
-              className={`${inputClass} mt-2 font-mono text-xs`}
             />
           </div>
 
