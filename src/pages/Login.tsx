@@ -43,8 +43,8 @@ export function Login() {
   }
 
   return (
-    <div className="blueprint-grid relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-4">
-      <div className="pointer-events-none absolute inset-0" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-4">
+      <div className="blueprint-grid pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-accent2/10 blur-[140px]" />
       <div className="pointer-events-none absolute bottom-0 right-0 h-[360px] w-[360px] rounded-full bg-accent/10 blur-[140px]" />
 
