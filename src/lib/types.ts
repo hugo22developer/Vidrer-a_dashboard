@@ -30,6 +30,7 @@ export interface Product {
   description: string;
   image: string;
   specs: string[];
+  simulationPrompt?: string;
   status: ProductStatus;
   consultations: number; // mock de "más consultado"
 }
