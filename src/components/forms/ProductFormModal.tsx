@@ -79,7 +79,10 @@ export function ProductFormModal({ open, onClose, onSave, initial, categories, d
       consultations: initial?.consultations ?? 0,
       ...form,
       slug: form.slug || slugify(form.title),
-      image: form.image || `/products/${form.categorySlug}/${form.slug || slugify(form.title)}.jpg`,
+      // Sin inventar una ruta: la landing sirve las imagenes desde Cloudinary y
+      // cae en su placeholder cuando `image` viene vacio. Una ruta local tipo
+      // /products/... solo garantiza un 404 por producto.
+      image: form.image.trim(),
     });
     onClose();
   }
